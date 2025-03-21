@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Room - {{ room.hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Book Room at {{ room.hotel.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Room Details</h5>
+                        <p><strong>Type:</strong> {{ room.get_room_type_display }}</p>
+                        <p><strong>Capacity:</strong> {{ room.capacity }} person(s)</p>
+                        <p><strong>Price:</strong> ${{ room.price }} per night</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Hotel Details</h5>
+                        <p><strong>Name:</strong> {{ room.hotel.name }}</p>
+                        <p><strong>Location:</strong> {{ room.hotel.city }}, {{ room.hotel.country }}</p>
+                        <p><strong>Rating:</strong> {{ room.hotel.rating }}</p>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="alert alert-info mt-3">
+                        <p><strong>Note:</strong> The total price will be calculated based on the number of nights.</p>
+                    </div>
+                    
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-success">Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

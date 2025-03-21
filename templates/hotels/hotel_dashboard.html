@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotel Dashboard - Hotel Booking{% endblock %}
+
+{% block content %}
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+    }
+    .room-card {
+        transition: transform 0.3s;
+    }
+    .room-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>Hotel Dashboard</h1>
+        <p>Welcome to your hotel dashboard, {{ user.username }}!</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Rooms</h5>
+                <p class="card-text display-4">{{ rooms.count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Bookings</h5>
+                <p class="card-text display-4">{{ bookings|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Rating</h5>
+                <p class="card-text display-4">{{ hotel.rating|default:"N/A" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Hotel Details</h3>
+                <a href="{% url 'edit_hotel' %}" class="btn btn-primary">Edit Hotel</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        {% if hotel.image %}
+                            <img src="{{ hotel.image.url }}" class="img-fluid rounded" alt="{{ hotel.name }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x300?text=No+Image" class="img-fluid rounded" alt="No Image">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h4>{{ hotel.name }}</h4>
+                        <p>{{ hotel.description }}</p>
+                        <p><strong>Address:</strong> {{ hotel.address }}, {{ hotel.city }}, {{ hotel.state }}, {{ hotel.country }}, {{ hotel.zip_code }}</p>
+                        <p><strong>Price per night:</strong> ${{ hotel.price_per_night }}</p>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Hotel Location</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="map" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Rooms</h3>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                    Add Room
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Room Type</th>
+                                <th>Price</th>
+                                <th>Capacity</th>
+                                <th>Available</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in rooms %}
+                                <tr>
+                                    <td>{{ room.get_room_type_display }}</td>
+                                    <td>${{ room.price }}</td>
+                                    <td>{{ room.capacity }}</td>
+                                    <td>
+                                        {% if room.available %}
+                                            <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-room" data-room-id="{{ room.id }}">Edit</button>
+                                        <button class="btn btn-sm btn-danger delete-room" data-room-id="{{ room.id }}">Delete</button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No rooms added yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Bookings</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer</th>
+                                <th>Room</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.user.username }}</td>
+                                    <td>{{ booking.room.get_room_type_display }}</td>
+                                    <td>{{ booking.check_in_date }}</td>
+                                    <td>{{ booking.check_out_date }}</td>
+                                    <td>${{ booking.total_price }}</td>
+                                    <td>
+                                        {% if booking.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif booking.status == 'confirmed' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% elif booking.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-sm btn-info">View</a>
+                                        {% if booking.status == 'pending' %}
+                                            <a href="{% url 'confirm_booking' booking.id %}" class="btn btn-sm btn-success">Confirm</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No bookings yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Room Modal -->
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Room</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_room' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="room_type" class="form-label">Room Type</label>
+                        <select class="form-select" id="room_type" name="room_type" required>
+                            <option value="single">Single</option>
+                            <option value="double">Double</option>
+                            <option value="suite">Suite</option>
+                            <option value="deluxe">Deluxe</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price per Night ($)</label>
+                        <input type="number" class="form-control" id="price" name="price" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="capacity" class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="capacity" name="capacity" min="1" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="available" name="available" checked>
+                        <label class="form-check-label" for="available">Available</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Room</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Room Modal -->
+<div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Room</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoomForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="edit_room_type" class="form-label">Room Type</label>
+                        <select class="form-select" id="edit_room_type" name="room_type" required>
+                            <option value="single">Single</option>
+                            <option value="double">Double</option>
+                            <option value="suite">Suite</option>
+                            <option value="deluxe">Deluxe</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_price" class="form-label">Price per Night ($)</label>
+                        <input type="number" class="form-control" id="edit_price" name="price" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_capacity" class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="edit_capacity" name="capacity" min="1" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_available" name="available">
+                        <label class="form-check-label" for="edit_available">Available</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Map initialization
+    function initializeMap() {
+        const hotelLat = {{ hotel.latitude|default:'null' }};
+        const hotelLng = {{ hotel.longitude|default:'null' }};
+        
+        if (hotelLat && hotelLng) {
+            const hotelLocation = { lat: hotelLat, lng: hotelLng };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: hotelLocation,
+            });
+            
+            new google.maps.Marker({
+                position: hotelLocation,
+                map: map,
+                title: "{{ hotel.name }}"
+            });
+        } else {
+            document.getElementById("map").innerHTML = "<p class='text-center p-5'>Location coordinates not available</p>";
+        }
+    }
+    
+    // Room edit functionality
+    document.querySelectorAll('.edit-room').forEach(button => {
+        button.addEventListener('click', function() {
+            const roomId = this.getAttribute('data-room-id');
+            const editForm = document.getElementById('editRoomForm');
+            editForm.action = `/hotels/rooms/${roomId}/edit/`;
+            
+            // Fetch room data and populate form
+            fetch(`/hotels/rooms/${roomId}/data/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('edit_room_type').value = data.room_type;
+                    document.getElementById('edit_price').value = data.price;
+                    document.getElementById('edit_capacity').value = data.capacity;
+                    document.getElementById('edit_available').checked = data.available;
+                    
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('editRoomModal'));
+                    modal.show();
+                });
+        });
+    });
+    
+    // Room delete functionality
+    document.querySelectorAll('.delete-room').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this room?')) {
+                const roomId = this.getAttribute('data-room-id');
+                window.location.href = `/hotels/rooms/${roomId}/delete/`;
+            }
+        });
+    });
+    
+    // Initialize map when Google Maps API is loaded
+    if (window.google && window.google.maps) {
+        initializeMap();
+    }
+</script>
+{% endblock %}

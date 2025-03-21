@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Hotel - {{ hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Edit Hotel Details</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Hotel Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ hotel.name }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="price_per_night" class="form-label">Price per Night ($)</label>
+                                <input type="number" class="form-control" id="price_per_night" name="price_per_night" value="{{ hotel.price_per_night }}" min="1" step="0.01" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ hotel.city }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="state" class="form-label">State</label>
+                                <input type="text" class="form-control" id="state" name="state" value="{{ hotel.state }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="country" name="country" value="{{ hotel.country }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="zip_code" class="form-label">ZIP Code</label>
+                                <input type="text" class="form-control" id="zip_code" name="zip_code" value="{{ hotel.zip_code }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="3" required>{{ hotel.address }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="5" required>{{ hotel.description }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="latitude" class="form-label">Latitude (for map)</label>
+                                <input type="number" class="form-control" id="latitude" name="latitude" value="{{ hotel.latitude|default:'' }}" step="any">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="longitude" class="form-label">Longitude (for map)</label>
+                                <input type="number" class="form-control" id="longitude" name="longitude" value="{{ hotel.longitude|default:'' }}" step="any">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Hotel Image</label>
+                        {% if hotel.image %}
+                            <div class="mb-2">
+                                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                        {% endif %}
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Update Hotel Details</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

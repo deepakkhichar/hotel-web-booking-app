@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Hotel Booking{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded mb-4">
+    <h1 class="display-4">Find Your Perfect Stay</h1>
+    <p class="lead">Discover amazing hotels at the best prices for your next trip.</p>
+    <hr class="my-4">
+    <p>Browse our selection of premium hotels or register your own property.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'hotel_list' %}" role="button">Browse Hotels</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card mb-4 hotel-card">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-3x mb-3 text-primary"></i>
+                <h3 class="card-title">Search</h3>
+                <p class="card-text">Find the perfect hotel based on location, price, and amenities.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4 hotel-card">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-3x mb-3 text-success"></i>
+                <h3 class="card-title">Book</h3>
+                <p class="card-text">Book your stay with instant confirmation and no hidden fees.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4 hotel-card">
+            <div class="card-body text-center">
+                <i class="fas fa-bed fa-3x mb-3 text-info"></i>
+                <h3 class="card-title">Enjoy</h3>
+                <p class="card-text">Enjoy your stay with our carefully selected premium hotels.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Featured Hotels</h2>
+    </div>
+    {% for hotel in featured_hotels %}
+        <div class="col-md-4 mb-4">
+            <div class="card hotel-card h-100">
+                {% if hotel.image %}
+                    <img src="{{ hotel.image.url }}" class="card-img-top" alt="{{ hotel.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light d-flex justify-content-center align-items-center" style="height: 200px;">
+                        <p class="text-muted">No image available</p>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ hotel.name }}</h5>
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt text-danger"></i> {{ hotel.city }}, {{ hotel.country }}
+                    </p>
+                    <p class="card-text">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= hotel.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">${{ hotel.price_per_night }} per night</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <p class="text-center">No featured hotels available at the moment.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

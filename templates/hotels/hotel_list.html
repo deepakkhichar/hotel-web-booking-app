@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Hotels - Hotel Booking{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Hotels</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{% url 'hotel_list' %}">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="search" class="form-control" placeholder="Search hotels..." value="{{ request.GET.search|default:'' }}">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select name="city" class="form-select">
+                        <option value="">All Cities</option>
+                        {% for city in cities %}
+                            <option value="{{ city }}" {% if request.GET.city == city %}selected{% endif %}>{{ city }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select name="country" class="form-select">
+                        <option value="">All Countries</option>
+                        {% for country in countries %}
+                            <option value="{{ country }}" {% if request.GET.country == country %}selected{% endif %}>{{ country }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select name="rating" class="form-select">
+                        <option value="">Any Rating</option>
+                        <option value="5" {% if request.GET.rating == '5' %}selected{% endif %}>5 Stars</option>
+                        <option value="4" {% if request.GET.rating == '4' %}selected{% endif %}>4+ Stars</option>
+                        <option value="3" {% if request.GET.rating == '3' %}selected{% endif %}>3+ Stars</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" name="max_price" class="form-control" placeholder="Max price" value="{{ request.GET.max_price|default:'' }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    {% for hotel in hotels %}
+        <div class="col-md-4 mb-4">
+            <div class="card hotel-card h-100">
+                {% if hotel.image %}
+                    <img src="{{ hotel.image.url }}" class="card-img-top" alt="{{ hotel.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" alt="No Image">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ hotel.name }}</h5>
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt text-danger"></i> {{ hotel.city }}, {{ hotel.country }}
+                    </p>
+                    <p class="card-text">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= hotel.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                        ({{ hotel.rating }})
+                    </p>
+                    <p class="card-text">
+                        <strong>${{ hotel.price_per_night }} per night</strong>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No hotels found.</div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

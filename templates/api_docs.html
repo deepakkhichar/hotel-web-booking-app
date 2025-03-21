@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}API Documentation - Hotel Booking{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">API Documentation</h1>
+    
+    <div class="alert alert-info">
+        <p>Base URL: <code>http://localhost:8000/api/</code></p>
+        <p>All endpoints require authentication unless specified otherwise.</p>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Authentication</h3>
+        </div>
+        <div class="card-body">
+            <h5>Login</h5>
+            <p><code>POST /api/auth/login/</code></p>
+            <p>Request Body:</p>
+            <pre><code>{
+  "username": "string",
+  "password": "string"
+}</code></pre>
+            <p>Response:</p>
+            <pre><code>{
+  "token": "string"
+}</code></pre>
+            
+            <hr>
+            
+            <h5>Register</h5>
+            <p><code>POST /api/auth/register/</code></p>
+            <p>Request Body:</p>
+            <pre><code>{
+  "username": "string",
+  "email": "string",
+  "password": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "phone": "string",
+  "address": "string",
+  "is_hotel": boolean,
+  "hotel_details": {  // Required if is_hotel is true
+    "name": "string",
+    "description": "string",
+    "address": "string",
+    "city": "string",
+    "country": "string",
+    "price_per_night": number
+  }
+}</code></pre>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Hotels</h3>
+        </div>
+        <div class="card-body">
+            <h5>List Hotels</h5>
+            <p><code>GET /api/hotels/</code></p>
+            <p>Query Parameters:</p>
+            <ul>
+                <li><code>search</code>: Search by hotel name</li>
+                <li><code>city</code>: Filter by city</li>
+                <li><code>country</code>: Filter by country</li>
+                <li><code>rating</code>: Filter by minimum rating</li>
+                <li><code>max_price</code>: Filter by maximum price per night</li>
+            </ul>
+            <p>Response:</p>
+            <pre><code>[
+  {
+    "id": integer,
+    "name": "string",
+    "description": "string",
+    "address": "string",
+    "city": "string",
+    "country": "string",
+    "rating": number,
+    "price_per_night": number,
+    "image": "string" (URL)
+  }
+]</code></pre>
+            
+            <hr>
+            
+            <h5>Get Hotel Details</h5>
+            <p><code>GET /api/hotels/{id}/</code></p>
+            <p>Response:</p>
+            <pre><code>{
+  "id": integer,
+  "name": "string",
+  "description": "string",
+  "address": "string",
+  "city": "string",
+  "state": "string",
+  "country": "string",
+  "zip_code": "string",
+  "rating": number,
+  "price_per_night": number,
+  "image": "string" (URL),
+  "rooms": [
+    {
+      "id": integer,
+      "room_type": "string",
+      "price": number,
+      "capacity": integer,
+      "available": boolean
+    }
+  ]
+}</code></pre>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Bookings</h3>
+        </div>
+        <div class="card-body">
+            <h5>List User Bookings</h5>
+            <p><code>GET /api/bookings/</code></p>
+            <p>Response:</p>
+            <pre><code>[
+  {
+    "id": integer,
+    "room": {
+      "id": integer,
+      "room_type": "string",
+      "hotel": {
+        "id": integer,
+        "name": "string"
+      }
+    },
+    "check_in_date": "string" (YYYY-MM-DD),
+    "check_out_date": "string" (YYYY-MM-DD),
+    "status": "string",
+    "total_price": number,
+    "created_at": "string" (datetime)
+  }
+]</code></pre>
+            
+            <hr>
+            
+            <h5>Create Booking</h5>
+            <p><code>POST /api/bookings/</code></p>
+            <p>Request Body:</p>
+            <pre><code>{
+  "room_id": integer,
+  "check_in_date": "string" (YYYY-MM-DD),
+  "check_out_date": "string" (YYYY-MM-DD)
+}</code></pre>
+            
+            <hr>
+            
+            <h5>Cancel Booking</h5>
+            <p><code>POST /api/bookings/{id}/cancel/</code></p>
+            
+            <hr>
+            
+            <h5>Confirm Booking (Hotel Only)</h5>
+            <p><code>POST /api/bookings/{id}/confirm/</code></p>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Notifications</h3>
+        </div>
+        <div class="card-body">
+            <h5>List Notifications</h5>
+            <p><code>GET /api/notifications/</code></p>
+            <p>Response:</p>
+            <pre><code>[
+  {
+    "id": integer,
+    "title": "string",
+    "message": "string",
+    "is_read": boolean,
+    "created_at": "string" (datetime)
+  }
+]</code></pre>
+            
+            <hr>
+            
+            <h5>Mark Notification as Read</h5>
+            <p><code>POST /api/notifications/{id}/read/</code></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
