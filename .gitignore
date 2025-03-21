@@ -8,6 +8,7 @@ __pycache__/
 hotel_images
 .idea
 venv
+static
 .DS_Store
 pyproject.toml
 # Distribution / packaging
